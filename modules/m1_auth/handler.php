@@ -1,15 +1,31 @@
 <?php
+
 declare(strict_types=1);
 
-/**
- * ITCS333 Project starter — m1_auth handler (module under construction).
- * Implement the endpoints in contracts/ for your module.
- * The routing context is in $GLOBALS['__route'] ('area', 'rest', 'uri').
- * Use db() from src/db.php and the helpers in src/http.php.
- */
+function auth_public_user(array $row): array
+{
+    return [
+        'id'       => (int) $row['id'],
+        'username' => (string) $row['username'],
+        'is_admin' => (int) $row['is_admin'],
+    ];
+} //end function
 
-$rest = $GLOBALS['__route']['rest'] ?? '';
 
-// TODO: implement your module's endpoints here (see contracts/).
+function auth_find_by_username(string $username): ?array
+{
+    $stmt = db()->prepare(
+        'SELECT id, username, password_hash, is_admin FROM users WHERE username = ?'
+    );
+    $stmt->execute([$username]);
+    $row = $stmt->fetch();
+    return $row === false ? null : $row;
+} // end function 
 
-send_error(501, 'NOT_IMPLEMENTED', ['module' => 'm1_auth', 'rest' => $rest]);
+$rest   = rtrim($GLOBALS['__route']['rest'] ?? '', '/');
+$method = http_method();
+
+switch ($rest) {
+    default:
+        send_error(404, 'NOT_FOUND');
+}
